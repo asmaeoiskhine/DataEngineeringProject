@@ -9,30 +9,27 @@ class CharactersSpider(scrapy.Spider):
 
     start_urls = [
         "https://bokudakegainaimachi.fandom.com/wiki/Category:Characters",
-	"https://violet-evergarden.fandom.com/wiki/Category:Characters",
-	"https://ansatsukyoshitsu.fandom.com/wiki/Category:Characters",
-	"https://fruitsbasket.fandom.com/wiki/Category:Characters",
-	"https://detectiveconan.fandom.com/wiki/Category:Characters",
-	"https://dragonball.fandom.com/wiki/Category:Characters",
-  	"https://codegeass.fandom.com/wiki/Category:Characters",
-	"https://gintama.fandom.com/wiki/Category:Characters",
+        "https://violet-evergarden.fandom.com/wiki/Category:Characters",
+        "https://ansatsukyoshitsu.fandom.com/wiki/Category:Characters",
+        "https://fruitsbasket.fandom.com/wiki/Category:Characters",
+        "https://detectiveconan.fandom.com/wiki/Category:Characters",
+        "https://dragonball.fandom.com/wiki/Category:Characters",
+        "https://codegeass.fandom.com/wiki/Category:Characters",
+        "https://gintama.fandom.com/wiki/Category:Characters",
         "https://swordartonline.fandom.com/wiki/Category:Characters",
         "https://noragami.fandom.com/wiki/Category:Characters",
         "https://mob-psycho-100.fandom.com/wiki/Category:Characters",
         "https://vinlandsaga.fandom.com/wiki/Category:Characters",
         "https://shigatsu-wa-kimi-no-uso.fandom.com/wiki/Category:Characters",
         "https://tokyorevengers.fandom.com/wiki/Category:Characters",
-        # tu pourras ajouter d'autres animes ici
     ]
 
     def parse(self, response):
         """
         Parse les pages Category:Characters
         """
-        # Récupération du nom de l'anime depuis l'URL
         anime_name = response.url.split("//")[1].split(".")[0].replace("-", " ")
 
-        # Sélection des liens vers les pages personnages
         character_links = response.css(
             "div.category-page__members a.category-page__member-link::attr(href)"
         ).getall()
@@ -44,7 +41,6 @@ class CharactersSpider(scrapy.Spider):
                 meta={"anime": anime_name}
             )
 
-        # Gestion de la pagination
         next_page = response.css(
             "a.category-page__pagination-next::attr(href)"
         ).get()
@@ -66,15 +62,17 @@ class CharactersSpider(scrapy.Spider):
         item["fandom"] = response.url.split("//")[1].split(".")[0]
         item["character_url"] = response.url
 
-        # Gender
-        item["gender"] = response.css(
-            'div.pi-item[data-source="gender"] > div.pi-data-value::text'
-        ).get()
+        # Gender (robuste)
+        gender = response.css(
+            'div.pi-item[data-source="gender"] div.pi-data-value ::text'
+        ).getall()
+        item["gender"] = " ".join(g.strip() for g in gender if g.strip())
 
-        # Status
-        item["status"] = response.css(
-            'div.pi-item[data-source="status"] > div.pi-data-value::text'
-        ).get()
+        # Status (robuste)
+        status = response.css(
+            'div.pi-item[data-source="status"] div.pi-data-value ::text'
+        ).getall()
+        item["status"] = " ".join(s.strip() for s in status if s.strip())
 
         # Image principale
         item["image_url"] = response.css(
@@ -83,11 +81,9 @@ class CharactersSpider(scrapy.Spider):
 
         item["scraped_at"] = datetime.utcnow().isoformat()
 
-        # --- Vérification avant de yield ---
-        # Liste des champs à tester
+        # --- Vérification avant yield ---
         fields_to_check = ["name", "gender", "status"]
         missing_count = sum(1 for f in fields_to_check if not item.get(f))
 
-        # On ignore si name est vide ou si au moins 3 champs sont manquants
         if item["name"] and missing_count < 3:
             yield item
