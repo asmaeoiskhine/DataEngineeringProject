@@ -6,30 +6,17 @@ class TestCategoriesSpider(scrapy.Spider):
 
     # 🔹 Liste de toutes les pages de catégories que tu veux tester
     start_urls = [
-        "https://violet-evergarden.fandom.com/wiki/Category:Characters",
-        "https://jujutsu-kaisen.fandom.com/wiki/Category:Characters",
-        "https://bokudakegainaimachi.fandom.com/wiki/Category:Characters",
-        "https://ansatsukyoshitsu.fandom.com/wiki/Category:Characters",
-        "https://attackontitan.fandom.com/wiki/Category:Characters",
-        "https://kimetsu-no-yaiba.fandom.com/wiki/Category:Characters",
-        "https://jojo.fandom.com/wiki/Category:Characters",
-        "https://dragonball.fandom.com/wiki/Category:Characters",
-        "https://fruitsbasket.fandom.com/wiki/Category:Characters",
-        "https://detectiveconan.fandom.com/wiki/Category:Characters",
-	"https://codegeass.fandom.com/wiki/Category:Characters",
-	"https://gintama.fandom.com/wiki/Category:Characters",
-	"https://tokyoghoul.fandom.com/wiki/Category:Characters",
-	"https://onepunchman.fandom.com/wiki/Category:Characters",
-	"https://swordartonline.fandom.com/wiki/Category:Characters",
-	"https://noragami.fandom.com/wiki/Category:Characters",
-	"https://mob-psycho-100.fandom.com/wiki/Category:Characters",
-	"https://bungostraydogs.fandom.com/wiki/Category:Characters",
-	"https://chainsaw-man.fandom.com/wiki/Category:Characters",
-	"https://vinlandsaga.fandom.com/wiki/Category:Characters",
-	"https://myheroacademia.fandom.com/wiki/Category:Characters",
-	"https://shigatsu-wa-kimi-no-uso.fandom.com/wiki/Category:Characters",
-	"https://tokyorevengers.fandom.com/wiki/Category:Characters",
-
+	"https://obluda.fandom.com/wiki/Category:Characters",
+	"https://haikyuu.fandom.com/wiki/Category:Characters",
+	"https://nana.fandom.com/wiki/Category:Characters",
+	"https://dr-stone.fandom.com/wiki/Category:Characters",
+	"https://madeinabyss.fandom.com/wiki/Category:Characters",
+	"https://dandadan.fandom.com/wiki/Category:Characters",
+	"https://kaichouwamaidsama.fandom.com/wiki/Category:Characters",
+	"https://ao-haru-ride.fandom.com/wiki/Category:Characters",
+	"https://sayiloveyou.fandom.com/wiki/Category:Characters",
+	"https://kiminitodoke.fandom.com/wiki/Category:Characters",
+	"https://watashi-ga-motete-dousunda.fandom.com/wiki/Category:Characters",
 
     ]
 

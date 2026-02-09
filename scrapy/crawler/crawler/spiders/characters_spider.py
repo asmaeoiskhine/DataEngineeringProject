@@ -8,6 +8,16 @@ class CharactersSpider(scrapy.Spider):
     allowed_domains = ["fandom.com"]
 
     start_urls = [
+ 	"https://obluda.fandom.com/wiki/Category:Characters",
+        "https://nana.fandom.com/wiki/Category:Characters",
+        "https://dr-stone.fandom.com/wiki/Category:Characters",
+        "https://madeinabyss.fandom.com/wiki/Category:Characters",
+        "https://dandadan.fandom.com/wiki/Category:Characters",
+        "https://kaichouwamaidsama.fandom.com/wiki/Category:Characters",
+        "https://ao-haru-ride.fandom.com/wiki/Category:Characters",
+        "https://sayiloveyou.fandom.com/wiki/Category:Characters",
+        "https://kiminitodoke.fandom.com/wiki/Category:Characters",
+        "https://watashi-ga-motete-dousunda.fandom.com/wiki/Category:Characters",
         "https://bokudakegainaimachi.fandom.com/wiki/Category:Characters",
         "https://violet-evergarden.fandom.com/wiki/Category:Characters",
         "https://ansatsukyoshitsu.fandom.com/wiki/Category:Characters",
@@ -21,13 +31,10 @@ class CharactersSpider(scrapy.Spider):
         "https://mob-psycho-100.fandom.com/wiki/Category:Characters",
         "https://vinlandsaga.fandom.com/wiki/Category:Characters",
         "https://shigatsu-wa-kimi-no-uso.fandom.com/wiki/Category:Characters",
-        "https://tokyorevengers.fandom.com/wiki/Category:Characters",
-    ]
+        "https://tokyorevengers.fandom.com/wiki/Category:Characters", ]
 
     def parse(self, response):
-        """
-        Parse les pages Category:Characters
-        """
+        # Parse Category:Characters pages
         anime_name = response.url.split("//")[1].split(".")[0].replace("-", " ")
 
         character_links = response.css(
@@ -49,9 +56,7 @@ class CharactersSpider(scrapy.Spider):
             yield response.follow(next_page, callback=self.parse)
 
     def parse_character(self, response):
-        """
-        Parse les pages individuelles des personnages
-        """
+        # Parse individual character pages (Fandom infobox)
         item = CharacterItem()
 
         item["name"] = response.css(
@@ -59,31 +64,67 @@ class CharactersSpider(scrapy.Spider):
         ).get()
 
         item["anime"] = response.meta.get("anime")
-        item["fandom"] = response.url.split("//")[1].split(".")[0]
         item["character_url"] = response.url
 
-        # Gender (robuste)
-        gender = response.css(
-            'div.pi-item[data-source="gender"] div.pi-data-value ::text'
+        # --- Gender ---
+        # Try the structured infobox first (case-insensitive match on data-source)
+        gender_parts = response.xpath(
+            '//div[contains(@class,"pi-item") and '
+            "translate(@data-source, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='gender']"
+            '//div[contains(@class,"pi-data-value")]//text()'
         ).getall()
-        item["gender"] = " ".join(g.strip() for g in gender if g.strip())
+        gender = " ".join(g.strip() for g in gender_parts if g.strip())
 
-        # Status (robuste)
-        status = response.css(
-            'div.pi-item[data-source="status"] div.pi-data-value ::text'
-        ).getall()
-        item["status"] = " ".join(s.strip() for s in status if s.strip())
+        # Fallback to table <td>
+        if not gender:
+            gender_td = response.xpath(
+                '//td[b[contains(normalize-space(.),"Gender")]]/following-sibling::td//text()'
+            ).getall()
+            gender = " ".join(g.strip() for g in gender_td if g.strip())
 
-        # Image principale
+        item["gender"] = gender or "Unknown"
+
+        # --- Status ---
+        # Use a robust XPath: case-insensitive match on data-source and collect all descendant text.
+        # normalize-space(string(...)) collapses whitespace and returns a single string.
+        status = response.xpath(
+            "normalize-space(string(//div[translate(@data-source, "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='status']"
+            "//div[contains(@class,'pi-data-value')]))"
+        ).get()
+
+        # If the above didn't match (some pages may use slightly different structure), try to get collapsible content explicitly
+        if not status:
+            status_parts = response.xpath(
+                '//div[contains(@class,"pi-item") and '
+                "translate(@data-source, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='status']"
+                '//div[contains(@class,"pi-data-value")]//div[contains(@class,"mw-collapsible-content")]//text()'
+            ).getall()
+            status = " ".join(p.strip() for p in status_parts if p.strip())
+
+        # Final fallback: table <td>
+        if not status:
+            status_td = response.xpath(
+                '//td[b[contains(normalize-space(.),"Status")]]/following-sibling::td//text()'
+            ).getall()
+            status = " ".join(p.strip() for p in status_td if p.strip())
+
+        item["status"] = status.strip() if status else "Unknown"
+
+        # --- Main image ---
         item["image_url"] = response.css(
             "figure.pi-item img::attr(src)"
         ).get()
 
         item["scraped_at"] = datetime.utcnow().isoformat()
 
-        # --- Vérification avant yield ---
+        # --- Verification before yield ---
         fields_to_check = ["name", "gender", "status"]
         missing_count = sum(1 for f in fields_to_check if not item.get(f))
+
+        # Log extracted values for debugging
+        self.logger.debug("Character parsed: name=%r gender=%r status=%r url=%s",
+                          item.get("name"), item.get("gender"), item.get("status"), item.get("character_url"))
 
         if item["name"] and missing_count < 3:
             yield item

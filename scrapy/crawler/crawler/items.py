@@ -4,7 +4,6 @@ import scrapy
 class CharacterItem(scrapy.Item):
     name = scrapy.Field()
     anime = scrapy.Field()
-    fandom = scrapy.Field()
     character_url = scrapy.Field()
     gender = scrapy.Field()
     status = scrapy.Field()
