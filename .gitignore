@@ -1,0 +1,84 @@
+# =========================
+# Environnements virtuels
+# =========================
+.venv/
+venv/
+env/
+ENV/
+.conda/
+.venv.bak/
+venv.bak/
+
+# =========================
+# Variables d'environnement
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Python - caches & builds
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+
+# =========================
+# Packaging / build
+# =========================
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# =========================
+# Jupyter / notebooks
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# IDE / OS
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# =========================
+# Scrapy
+# =========================
+.scrapy/
+*.jl
+
+# Si votre spider exporte des fichiers (à ignorer)
+# (Gardez seulement si vous régénérez ces fichiers à chaque run)
+scrapy/crawler/characters.json
+scrapy/crawler/*.json
+scrapy/crawler/*.csv
+
+# =========================
+# Streamlit
+# =========================
+.streamlit/secrets.toml
+
+# =========================
+# Docker / volumes locaux
+# =========================
+pgdata/
+mongo-data/
+data/
+
+# =========================
+# Fichiers temporaires
+# =========================
+*.tmp
+*.swp
+*.swo

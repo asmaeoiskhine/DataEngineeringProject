@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: de_postgres
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: webapp/Dockerfile
+    container_name: de_webapp
+    environment:
+      # Connexion DB depuis le container web (host = db)
+      DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
+
+      # Paramètres Scrapy (si ton import_characters.py les utilise)
+      RUN_SCRAPY_ON_START: "0"
+      environment:
+      SCRAPY_DIR: /project/scrapy/crawler
+      JSON_PATH: /project/scrapy/crawler/characters.json
+
+      SPIDER_NAME: "characters"
+    ports:
+      # Streamlit (si c'est streamlit). Sinon adapte selon ton framework.
+      - "8501:8501"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
