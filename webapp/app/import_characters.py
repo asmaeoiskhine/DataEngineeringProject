@@ -5,13 +5,11 @@ from pathlib import Path
 from datetime import datetime
 from sqlalchemy import create_engine, text
 
-# =====================
-# CONFIG
-# =====================
+# Configuration pour le scraping en temps réel et l'import des données dans la DB
 DB_URL = os.environ["DATABASE_URL"]
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]  # -> .../webapp
-PROJECT_ROOT = PROJECT_ROOT.parent                  # -> racine du repo
+PROJECT_ROOT = Path(__file__).resolve().parents[2] #racine du projet depuis ce fichier
+PROJECT_ROOT = PROJECT_ROOT.parent
 
 SCRAPY_DIR = Path(os.environ.get("SCRAPY_DIR", PROJECT_ROOT / "scrapy" / "crawler")).resolve()
 JSON_PATH = Path(os.environ.get("JSON_PATH", SCRAPY_DIR / "characters.json")).resolve()
@@ -20,9 +18,8 @@ SPIDER_NAME = os.environ.get("SPIDER_NAME", "characters")
 RUN_SCRAPY_ON_START = os.environ.get("RUN_SCRAPY_ON_START", "1") == "1"
 
 
-# =====================
-# UTILS
-# =====================
+
+# Utils
 def parse_dt(s):
     if not s:
         return None
@@ -32,9 +29,7 @@ def parse_dt(s):
         return None
 
 
-# =====================
-# SCRAPY
-# =====================
+# Fonction pour lancer le spider Scrapy
 def run_scrapy():
     print(f"[SCRAPY] cwd = {SCRAPY_DIR}")
     subprocess.run(
@@ -46,9 +41,7 @@ def run_scrapy():
 
 
 
-# =====================
-# DB
-# =====================
+# Database
 def init_db(engine):
     with engine.begin() as conn:
         conn.execute(text("""
@@ -56,7 +49,6 @@ def init_db(engine):
             id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             anime TEXT,
-            fandom TEXT,
             character_url TEXT UNIQUE,
             gender TEXT,
             status TEXT,
@@ -75,12 +67,11 @@ def import_json(engine):
         items = json.load(f)
 
     sql = text("""
-        INSERT INTO characters (name, anime, fandom, character_url, gender, status, image_url, scraped_at)
-        VALUES (:name, :anime, :fandom, :character_url, :gender, :status, :image_url, :scraped_at)
+        INSERT INTO characters (name, anime, character_url, gender, status, image_url, scraped_at)
+        VALUES (:name, :anime, :character_url, :gender, :status, :image_url, :scraped_at)
         ON CONFLICT (character_url) DO UPDATE SET
             name = EXCLUDED.name,
             anime = EXCLUDED.anime,
-            fandom = EXCLUDED.fandom,
             gender = EXCLUDED.gender,
             status = EXCLUDED.status,
             image_url = EXCLUDED.image_url,
@@ -96,7 +87,6 @@ def import_json(engine):
             conn.execute(sql, {
                 "name": it.get("name"),
                 "anime": it.get("anime"),
-                "fandom": it.get("fandom"),
                 "character_url": it.get("character_url"),
                 "gender": it.get("gender"),
                 "status": it.get("status"),
@@ -108,12 +98,9 @@ def import_json(engine):
     print(f"[IMPORT] {count} personnages importés.")
 
 
-# =====================
 # MAIN
-# =====================
 def main():
     engine = create_engine(DB_URL)
-
     init_db(engine)
 
     if RUN_SCRAPY_ON_START:

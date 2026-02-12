@@ -1,6 +1,4 @@
-# =========================
 # Environnements virtuels
-# =========================
 .venv/
 venv/
 env/
@@ -9,16 +7,12 @@ ENV/
 .venv.bak/
 venv.bak/
 
-# =========================
 # Variables d'environnement
-# =========================
 .env
 .env.*
 !.env.example
 
-# =========================
-# Python - caches & builds
-# =========================
+# Cache & builds
 __pycache__/
 *.py[cod]
 *$py.class
@@ -30,55 +24,40 @@ __pycache__/
 htmlcov/
 *.log
 
-# =========================
-# Packaging / build
-# =========================
+# Distribution / packaging
 build/
 dist/
 *.egg-info/
 .eggs/
 pip-wheel-metadata/
 
-# =========================
-# Jupyter / notebooks
-# =========================
+# Nnotebooks
 .ipynb_checkpoints/
 
-# =========================
 # IDE / OS
-# =========================
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 
-# =========================
 # Scrapy
-# =========================
 .scrapy/
 *.jl
 
-# Si votre spider exporte des fichiers (à ignorer)
-# (Gardez seulement si vous régénérez ces fichiers à chaque run)
+# Génération de fichiers pour le scraping
 scrapy/crawler/characters.json
 scrapy/crawler/*.json
 scrapy/crawler/*.csv
 
-# =========================
 # Streamlit
-# =========================
 .streamlit/secrets.toml
 
-# =========================
 # Docker / volumes locaux
-# =========================
 pgdata/
 mongo-data/
 data/
 
-# =========================
 # Fichiers temporaires
-# =========================
 *.tmp
 *.swp
 *.swo

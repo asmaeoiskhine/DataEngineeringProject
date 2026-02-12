@@ -22,7 +22,8 @@ services:
       # Connexion DB depuis le container web (host = db)
       DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
 
-      # Paramètres Scrapy (si ton import_characters.py les utilise)
+      # Paramètres Scrapy pour le lancement automatique du spider et la configuration des chemins
+      # "0" pour ne pas lancer Scrapy automatiquement, "1" pour le lancer.
       RUN_SCRAPY_ON_START: "0"
       environment:
       SCRAPY_DIR: /project/scrapy/crawler
@@ -30,7 +31,7 @@ services:
 
       SPIDER_NAME: "characters"
     ports:
-      # Streamlit (si c'est streamlit). Sinon adapte selon ton framework.
+      # Pour streamlit
       - "8501:8501"
     depends_on:
       - db
