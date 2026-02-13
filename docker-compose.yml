@@ -8,10 +8,27 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
       POSTGRES_DB: app
+      ELASTIC_USER: elastic
+      ELASTIC_PASSWORD: elasticmdp
+      ELASTIC_HOST: elasticsearch
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: de_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ELASTIC_PASSWORD=elasticmdp
+      - xpack.security.enabled=true
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
 
   web:
     build:
@@ -19,22 +36,17 @@ services:
       dockerfile: webapp/Dockerfile
     container_name: de_webapp
     environment:
-      # Connexion DB depuis le container web (host = db)
       DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
-
-      # Paramètres Scrapy pour le lancement automatique du spider et la configuration des chemins
-      # "0" pour ne pas lancer Scrapy automatiquement, "1" pour le lancer.
       RUN_SCRAPY_ON_START: "0"
-      environment:
       SCRAPY_DIR: /project/scrapy/crawler
       JSON_PATH: /project/scrapy/crawler/characters.json
-
       SPIDER_NAME: "characters"
     ports:
-      # Pour streamlit
       - "8501:8501"
     depends_on:
       - db
+      - elasticsearch
 
 volumes:
   pgdata:
+  esdata:

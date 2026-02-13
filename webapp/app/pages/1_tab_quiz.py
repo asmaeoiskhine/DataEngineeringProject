@@ -18,8 +18,9 @@ engine = create_engine(DB_URL)
 @st.cache_data(ttl=10)
 def load_df():
     with engine.connect() as conn:
+
         return pd.read_sql(
-            text("SELECT * FROM characters ORDER BY scraped_at DESC NULLS LAST, id DESC"),
+            text("SELECT * FROM characters ORDER BY id DESC"),
             conn
         )
 
@@ -46,8 +47,9 @@ scores = {
     "leader": 0,
 }
 
+# --- Questions ---
 q1 = st.radio(
-    "1️⃣ En groupe, tu es plutôt…",
+    "1. En groupe, tu es plutôt…",
     [
         "Observateur et discret",
         "Meneur naturel",
@@ -65,7 +67,7 @@ elif q1 == "Celui qui analyse la situation":
     scores["strategique"] += 2
 
 q2 = st.radio(
-    "2️⃣ Face à un problème, tu préfères…",
+    "2. Face à un problème, tu préfères…",
     [
         "Réfléchir seul",
         "Agir immédiatement",
@@ -84,7 +86,7 @@ elif q2 == "Trouver la meilleure stratégie":
     scores["strategique"] += 2
 
 q3 = st.radio(
-    "3️⃣ Ton plus grand atout est…",
+    "3. Ton plus grand atout est…",
     [
         "Ton sang-froid",
         "Ton intelligence",
@@ -102,7 +104,7 @@ elif q3 == "Ton charisme":
     scores["leader"] += 2
 
 q4 = st.radio(
-    "4️⃣ Dans une équipe, ton rôle est plutôt…",
+    "4. Dans une équipe, ton rôle est plutôt…",
     [
         "Support discret",
         "Chef d’équipe",
@@ -120,7 +122,7 @@ elif q4 == "Cerveau de l’équipe":
     scores["strategique"] += 2
 
 q5 = st.radio(
-    "5️⃣ Tu te décrirais plutôt comme…",
+    "5. Tu te décrirais plutôt comme…",
     [
         "Posé et réfléchi",
         "Passionné et intense",
@@ -137,7 +139,8 @@ elif q5 == "Responsable et fiable":
 elif q5 == "Ambitieux et déterminé":
     scores["leader"] += 2
 
-if st.button("✨ Découvrir mon personnage"):
+# --- Affichage du résultat ---
+if st.button("Découvrir mon personnage"):
     sorted_axes = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     top_axes = tuple([sorted_axes[0][0], sorted_axes[1][0]])
 
@@ -165,16 +168,15 @@ if st.button("✨ Découvrir mon personnage"):
         "protecteur": "Korosensei",
         "leader": "Manjiro Sano",
     }
-    character_name = profil_to_character.get(top_axes)
 
+    character_name = profil_to_character.get(top_axes)
     if character_name is None:
         character_name = fallback_by_axis.get(top_axes[0])
 
-
-    st.success(f"Tu es : {r['name']}")
-
     row = df[df["name"] == character_name]
     r = row.iloc[0]
+
+    st.success(f"Tu es : {r['name']}")
 
     img = fetch_image(r.get("image_url", ""))
     if img is not None:

@@ -1,8 +1,16 @@
-# webapp/elastic_utils.py
 from elasticsearch import Elasticsearch
+import os
+
+ELASTIC_HOST = os.environ.get("ELASTIC_HOST", "elasticsearch")
+ELASTIC_USER = os.environ.get("ELASTIC_USER", "elastic")
+ELASTIC_PASSWORD = os.environ.get("ELASTIC_PASSWORD", "")
 
 # Connexion Elasticsearch
-es = Elasticsearch("http://localhost:9200")
+es = Elasticsearch(
+    f"http://{ELASTIC_HOST}:9200",
+    basic_auth=(ELASTIC_USER, ELASTIC_PASSWORD)
+)
+
 index_name = "characters_index"
 
 def check_connection():
