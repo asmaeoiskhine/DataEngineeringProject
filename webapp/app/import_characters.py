@@ -2,7 +2,6 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from datetime import datetime
 from sqlalchemy import create_engine, text
 
 # Configuration pour le scraping en temps réel et l'import des données dans la DB
@@ -21,15 +20,6 @@ RUN_SCRAPY_ON_START = os.environ.get("RUN_SCRAPY_ON_START", "1") == "1"
 # -----------------------------
 # UTILS
 # -----------------------------
-def parse_dt(s):
-    if not s:
-        return None
-    try:
-        return datetime.fromisoformat(s)
-    except Exception:
-        return None
-
-
 def normalize_gender(gender: str) -> str:
     """
     Normalize gender values:
@@ -103,8 +93,7 @@ def init_db(engine):
             character_url TEXT UNIQUE,
             gender TEXT,
             status TEXT,
-            image_url TEXT,
-            scraped_at TIMESTAMP
+            image_url TEXT
         );
         """))
 
@@ -118,15 +107,14 @@ def import_json(engine):
         items = json.load(f)
 
     sql = text("""
-        INSERT INTO characters (name, anime, character_url, gender, status, image_url, scraped_at)
-        VALUES (:name, :anime, :character_url, :gender, :status, :image_url, :scraped_at)
+        INSERT INTO characters (name, anime, character_url, gender, status, image_url)
+        VALUES (:name, :anime, :character_url, :gender, :status, :image_url)
         ON CONFLICT (character_url) DO UPDATE SET
             name = EXCLUDED.name,
             anime = EXCLUDED.anime,
             gender = EXCLUDED.gender,
             status = EXCLUDED.status,
-            image_url = EXCLUDED.image_url,
-            scraped_at = EXCLUDED.scraped_at
+            image_url = EXCLUDED.image_url
     """)
 
     count = 0
@@ -142,7 +130,6 @@ def import_json(engine):
                 "gender": normalize_gender(it.get("gender")),  # <-- normalized
                 "status": normalize_status(it.get("status")),  # <-- normalized
                 "image_url": it.get("image_url"),
-                "scraped_at": parse_dt(it.get("scraped_at")),
             })
             count += 1
 

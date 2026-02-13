@@ -24,7 +24,7 @@ st.title("🧩 Anime Characters — Données scrapées (Fandom)")
 @st.cache_data(ttl=10)
 def load_df():
     with engine.connect() as conn:
-        df = pd.read_sql(text("SELECT * FROM characters ORDER BY scraped_at DESC NULLS LAST, id DESC"), conn)
+        df = pd.read_sql(text("SELECT * FROM characters ORDER BY id DESC"), conn)
     return df
 
 df = load_df()
@@ -126,7 +126,7 @@ left, right = st.columns([2, 1], gap="large")
 
 with left:
     st.subheader("Table (liens cliquables)")
-    show = df_view[["name", "anime", "gender", "status", "character_url", "image_url", "scraped_at"]].copy()
+    show = df_view[["name", "anime", "gender", "status", "character_url", "image_url"]].copy()
     st.data_editor(
         show,
         use_container_width=True,
@@ -202,13 +202,25 @@ with col1:
     st.altair_chart(chart, use_container_width=True)
 
 with col2:
-    st.subheader("Male vs Female par anime")
+    st.subheader("Male vs Female par anime (ratio %)")
 
-    # Filtrer Male et Female
+    import altair as alt
+
+    # -----------------------------
+    # Filtrer Male / Female
+    # -----------------------------
     df_gender = df_view[df_view["gender"].isin(["Male", "Female"])].copy()
     df_gender["anime"] = df_gender["anime"].fillna("Unknown")
 
+    # -----------------------------
+    # Top 15 animes les plus représentés
+    # -----------------------------
+    top_animes_gender = df_gender["anime"].value_counts().head(15).index
+    df_gender = df_gender[df_gender["anime"].isin(top_animes_gender)]
+
+    # -----------------------------
     # Comptage par anime + gender
+    # -----------------------------
     counts_gender = (
         df_gender
         .groupby(["anime", "gender"])
@@ -216,27 +228,54 @@ with col2:
         .reset_index(name="count")
     )
 
-    # Garder les 15 animes les plus représentés
-    top_animes_gender = df_gender["anime"].value_counts().head(15).index
-    counts_gender = counts_gender[counts_gender["anime"].isin(top_animes_gender)]
+    # -----------------------------
+    # Total par anime
+    # -----------------------------
+    totals = (
+        counts_gender
+        .groupby("anime")["count"]
+        .sum()
+        .reset_index(name="total")
+    )
 
-    # Graphique Altair avec barres côte à côte
+    # -----------------------------
+    # Calcul des pourcentages
+    # -----------------------------
+    counts_gender = counts_gender.merge(totals, on="anime")
+    counts_gender["percentage"] = (
+        counts_gender["count"] / counts_gender["total"] * 100
+    )
+
+    # -----------------------------
+    # Graphique Altair (barres empilées 100 %)
+    # -----------------------------
     chart_gender = (
         alt.Chart(counts_gender)
         .mark_bar()
         .encode(
-            x=alt.X("anime:N", sort="-y", title="Anime"),
-            y=alt.Y("count:Q", title="Nombre de personnages"),
-            xOffset="gender:N",
+            x=alt.X(
+                "anime:N",
+                sort="-y",
+                title="Anime"
+            ),
+            y=alt.Y(
+                "percentage:Q",
+                title="Pourcentage (%)",
+                scale=alt.Scale(domain=[0, 100])
+            ),
             color=alt.Color(
                 "gender:N",
                 scale=alt.Scale(
                     domain=["Male", "Female"],
-                    range=["green", "hotpink"]  # couleurs personnalisées
+                    range=["green", "hotpink"]
                 ),
                 title="Genre"
             ),
-            tooltip=["anime", "gender", "count"]
+            tooltip=[
+                "anime",
+                "gender",
+                alt.Tooltip("percentage:Q", format=".1f", title="Pourcentage (%)")
+            ]
         )
         .properties(height=350)
     )

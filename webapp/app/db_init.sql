@@ -5,8 +5,7 @@ CREATE TABLE IF NOT EXISTS characters (
   character_url TEXT UNIQUE,
   gender TEXT,
   status TEXT,
-  image_url TEXT,
-  scraped_at TIMESTAMP
+  image_url TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_characters_name ON characters (name);
