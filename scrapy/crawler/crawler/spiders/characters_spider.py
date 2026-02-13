@@ -56,7 +56,7 @@ class CharactersSpider(scrapy.Spider):
             yield response.follow(next_page, callback=self.parse)
 
     def parse_character(self, response):
-        # Parse individual character pages (Fandom infobox)
+        # Parse individuel pour chaque page personnage
         item = CharacterItem()
 
         item["name"] = response.css(
@@ -67,7 +67,7 @@ class CharactersSpider(scrapy.Spider):
         item["character_url"] = response.url
 
         # --- Gender ---
-        # Try the structured infobox first (case-insensitive match on data-source)
+        # Rendre insensible à la casse
         gender_parts = response.xpath(
             '//div[contains(@class,"pi-item") and '
             "translate(@data-source, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='gender']"
@@ -75,7 +75,6 @@ class CharactersSpider(scrapy.Spider):
         ).getall()
         gender = " ".join(g.strip() for g in gender_parts if g.strip())
 
-        # Fallback to table <td>
         if not gender:
             gender_td = response.xpath(
                 '//td[b[contains(normalize-space(.),"Gender")]]/following-sibling::td//text()'
@@ -85,15 +84,13 @@ class CharactersSpider(scrapy.Spider):
         item["gender"] = gender or "Unknown"
 
         # --- Status ---
-        # Use a robust XPath: case-insensitive match on data-source and collect all descendant text.
-        # normalize-space(string(...)) collapses whitespace and returns a single string.
+        # Rendre insensible à la casse
         status = response.xpath(
             "normalize-space(string(//div[translate(@data-source, "
             "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='status']"
             "//div[contains(@class,'pi-data-value')]))"
         ).get()
 
-        # If the above didn't match (some pages may use slightly different structure), try to get collapsible content explicitly
         if not status:
             status_parts = response.xpath(
                 '//div[contains(@class,"pi-item") and '
@@ -102,7 +99,6 @@ class CharactersSpider(scrapy.Spider):
             ).getall()
             status = " ".join(p.strip() for p in status_parts if p.strip())
 
-        # Final fallback: table <td>
         if not status:
             status_td = response.xpath(
                 '//td[b[contains(normalize-space(.),"Status")]]/following-sibling::td//text()'
@@ -111,18 +107,18 @@ class CharactersSpider(scrapy.Spider):
 
         item["status"] = status.strip() if status else "Unknown"
 
-        # --- Main image ---
+        # --- Image principale ---
         item["image_url"] = response.css(
             "figure.pi-item img::attr(src)"
         ).get()
 
         item["scraped_at"] = datetime.utcnow().isoformat()
 
-        # --- Verification before yield ---
+        # --- Verification ---
         fields_to_check = ["name", "gender", "status"]
         missing_count = sum(1 for f in fields_to_check if not item.get(f))
 
-        # Log extracted values for debugging
+
         self.logger.debug("Character parsed: name=%r gender=%r status=%r url=%s",
                           item.get("name"), item.get("gender"), item.get("status"), item.get("character_url"))
 

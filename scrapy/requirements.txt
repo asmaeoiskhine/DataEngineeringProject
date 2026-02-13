@@ -1,1 +1,1 @@
-à remplir
+scrapy>=2.11

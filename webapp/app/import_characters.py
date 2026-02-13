@@ -32,13 +32,13 @@ def normalize_gender(gender: str) -> str:
 
     g = gender.strip().lower()
 
-    # Symbol overrides first
+
     if "♀" in g:
         return "Female"
     if "♂" in g:
         return "Male"
 
-    # Text-based checks
+
     if "female" in g:
         return "Female"
     if "male" in g:
@@ -127,8 +127,8 @@ def import_json(engine):
                 "name": it.get("name"),
                 "anime": it.get("anime"),
                 "character_url": it.get("character_url"),
-                "gender": normalize_gender(it.get("gender")),  # <-- normalized
-                "status": normalize_status(it.get("status")),  # <-- normalized
+                "gender": normalize_gender(it.get("gender")),
+                "status": normalize_status(it.get("status")),
                 "image_url": it.get("image_url"),
             })
             count += 1

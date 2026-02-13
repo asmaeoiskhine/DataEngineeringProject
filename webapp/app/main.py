@@ -11,12 +11,12 @@ import plotly.express as px
 import streamlit as st
 from elastic_utils import check_connection, search_documents
 
-st.set_page_config(page_title="Anime Characters Dashboard", layout="wide")
+st.set_page_config(page_title="Dashboard - Personnages d'Animes", layout="wide")
 
 DB_URL = os.environ["DATABASE_URL"]
 engine = create_engine(DB_URL)
 
-st.title("🧩 Anime Characters — Données scrapées (Fandom)")
+st.title("Personnages d'Animes — Données scrapées sur Fandom")
 
 # -----------------------------
 # Load data
@@ -76,7 +76,6 @@ df["status"] = df["status"].apply(clean_status)
 # -----------------------------
 st.sidebar.header("Filtres")
 
-# Filtrage traditionnel sur dataframe
 animes = sorted([a for a in df["anime"].dropna().unique().tolist() if a.strip() != ""])
 anime_sel = st.sidebar.multiselect("Anime", animes)
 q = st.sidebar.text_input("Recherche (nom / genre / statut)", "")
@@ -95,14 +94,14 @@ if q.strip():
     df_view = df_view[df_view.apply(match_row, axis=1)]
 
 # Recherche Elasticsearch
-st.sidebar.subheader("🔍 Recherche avancée Elasticsearch")
+st.sidebar.subheader("Recherche avancée avec Elasticsearch")
 
 if check_connection():
     es_query = st.sidebar.text_input("Chercher :", "")
 
     if len(es_query.strip()) >= 3:
         hits = search_documents(es_query.strip())
-        st.sidebar.write(f"{len(hits)} documents trouvés :")
+        st.sidebar.write(f"{len(hits)} items trouvés :")
         for hit in hits:
             src = hit.get("_source", {})
             st.sidebar.write(
@@ -132,7 +131,7 @@ st.divider()
 left, right = st.columns([2, 1], gap="large")
 
 with left:
-    st.subheader("Table (liens cliquables)")
+    st.subheader("Tableau général")
     show = df_view[["name", "anime", "gender", "status", "character_url", "image_url"]].copy()
     st.data_editor(
         show,
@@ -149,17 +148,17 @@ with right:
     #---------------------------
     # Répartition globale
     #---------------------------
-    st.subheader("Répartition")
+    st.subheader("Distribution du nombre de personnages par Anime")
     by_anime = df_view["anime"].fillna("Unknown").value_counts().head(15)
     st.bar_chart(by_anime)
 
 # -----------------------------
-# Nouvelle ligne pour les graphiques côte à côte
+# Graphiques Gender et Status
 # -----------------------------
 col1, col2 = st.columns(2, gap="large")
 
 with col1:
-    st.subheader("Alive vs Deceased par anime")
+    st.subheader("Distribution des status Alive/Deceased par Anime")
 
     import altair as alt
 
@@ -209,7 +208,7 @@ with col1:
     st.altair_chart(chart, use_container_width=True)
 
 with col2:
-    st.subheader("Male vs Female par anime (ratio %)")
+    st.subheader("Ratio Male/Female par Anime")
 
     import altair as alt
 

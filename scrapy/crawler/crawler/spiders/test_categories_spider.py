@@ -4,7 +4,7 @@ class TestCategoriesSpider(scrapy.Spider):
     name = "test_categories"
     allowed_domains = ["fandom.com"]
 
-    # 🔹 Liste de toutes les pages de catégories que tu veux tester
+    # Liste des pages de catégories Characters à tester
     start_urls = [
 	"https://obluda.fandom.com/wiki/Category:Characters",
 	"https://haikyuu.fandom.com/wiki/Category:Characters",
@@ -21,7 +21,7 @@ class TestCategoriesSpider(scrapy.Spider):
     ]
 
     def start_requests(self):
-        # 🔹 On envoie toutes les requêtes avec errback pour gérer les erreurs
+        # On envoie toutes les requêtes avec errback pour gérer les erreurs
         for url in self.start_urls:
             yield scrapy.Request(
                 url, 
@@ -31,10 +31,10 @@ class TestCategoriesSpider(scrapy.Spider):
             )
 
     def parse(self, response):
-        # ✅ Page accessible
+        # Page accessible
         print(f"ACCESSIBLE ✅ : {response.url}")
 
     def errback_httpbin(self, failure):
-        # ❌ Page bloquée ou autre erreur
+        # Page bloquée ou autre erreur
         request = failure.request
         print(f"BLOCKED ❌ : {request.url} - {repr(failure.value)}")

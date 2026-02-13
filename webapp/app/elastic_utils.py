@@ -3,7 +3,7 @@ from elasticsearch import Elasticsearch
 
 # Connexion Elasticsearch
 es = Elasticsearch("http://localhost:9200")
-index_name = "characters_index"  # ou le nom que tu veux
+index_name = "characters_index"
 
 def check_connection():
     return es.ping()
