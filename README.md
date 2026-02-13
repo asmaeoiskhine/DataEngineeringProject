@@ -11,7 +11,6 @@ Ce projet a pour but de mettre en pratique les notions vues en cours: scraping w
 
 # Architecture/Arborescence
 
-
 ```text
 DataEngineeringProject/
 ├── Pipfile
@@ -48,7 +47,6 @@ Puis d'ouvrir dans un navigateur:
 http://localhost:8501
 
 # Données collectées
-
 Source des données : Les données collectées issues d'un scraping automatisé réalisé à l'aide de Scrapy sur plusieurs sites Fandom consacrés à des séries d'anime. Le scraping cible les pages de catégorie Characters puis les pages individuelles de chaque personnage. Chaque perosnnage correspond à une page uniqu sur son wiki respectif. 
 
 Format des données : les données sont exportées au format JSON dans le fichier crawler/characters.json. Chaque entrée du fichier correspond à un personnage et respecte une structure homogène. 
@@ -102,3 +100,8 @@ Pour accéder à la BBD, nous utilisons SQLAlchemy qui est compatible avec docke
 
 # WebApp avec Streamlit
 Pour l'application web, nous avons opté pour Streamlit que nous avons déjà manipulé. C'est un framework rapide à développer et qui permet d'obtenir une interface interactive.
+L'interface est composée de 3 onglets:
+- Le 1er dashboard affiche la table avec toutes les données scrapées et les liens cliquables. Nous avons aussi crée un diagramme en barre qui présente le nombre de personnages pour chaque animé, un qui présente le status des personnages et un graphe qui montre le ratio de personnages féminin et masculin pour chaque animé.
+- Le 2ème onglet affiche un mini quiz de personnalité qui exploite nos données scrapées
+- Le 3ème onglet permet d'afficher une galerie de personnages avec une interface interactive sur laquelle il est possible de mofidier les paramètre d'affichage.
+Enfin, la side barre permet de retrouver les onglets et les filtres pour le dashboard. L'un permet de filtrer par animé, l'autre de rechercher une donnée via le moteur de recherche elasticsearch.
