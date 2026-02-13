@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, text
 # Configuration pour le scraping en temps réel et l'import des données dans la DB
 DB_URL = os.environ["DATABASE_URL"]
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2] #racine du projet depuis ce fichier
+PROJECT_ROOT = Path(__file__).resolve().parents[2]  # racine du projet depuis ce fichier
 PROJECT_ROOT = PROJECT_ROOT.parent
 
 SCRAPY_DIR = Path(os.environ.get("SCRAPY_DIR", PROJECT_ROOT / "scrapy" / "crawler")).resolve()
@@ -18,8 +18,9 @@ SPIDER_NAME = os.environ.get("SPIDER_NAME", "characters")
 RUN_SCRAPY_ON_START = os.environ.get("RUN_SCRAPY_ON_START", "1") == "1"
 
 
-
-# Utils
+# -----------------------------
+# UTILS
+# -----------------------------
 def parse_dt(s):
     if not s:
         return None
@@ -29,7 +30,56 @@ def parse_dt(s):
         return None
 
 
+def normalize_gender(gender: str) -> str:
+    """
+    Normalize gender values:
+    - 'female' (any case) or '♀' → 'Female'
+    - 'male' (any case) or '♂' → 'Male'
+    - Anything else → 'Unknown'
+    """
+    if not isinstance(gender, str) or not gender.strip():
+        return "Unknown"
+
+    g = gender.strip().lower()
+
+    # Symbol overrides first
+    if "♀" in g:
+        return "Female"
+    if "♂" in g:
+        return "Male"
+
+    # Text-based checks
+    if "female" in g:
+        return "Female"
+    if "male" in g:
+        return "Male"
+
+    return "Unknown"
+
+
+def normalize_status(status: str) -> str:
+    """
+    Normalize status values:
+    - contains 'Alive' (any case) → 'Alive'
+    - contains 'Deceased' (any case) → 'Deceased'
+    - anything else → 'Unknown'
+    """
+    if not isinstance(status, str) or not status.strip():
+        return "Unknown"
+
+    s = status.strip().lower()
+
+    if "alive" in s:
+        return "Alive"
+    if "deceased" in s:
+        return "Deceased"
+
+    return "Unknown"
+
+
+# -----------------------------
 # Fonction pour lancer le spider Scrapy
+# -----------------------------
 def run_scrapy():
     print(f"[SCRAPY] cwd = {SCRAPY_DIR}")
     subprocess.run(
@@ -40,8 +90,9 @@ def run_scrapy():
     print("[SCRAPY] Terminé.")
 
 
-
+# -----------------------------
 # Database
+# -----------------------------
 def init_db(engine):
     with engine.begin() as conn:
         conn.execute(text("""
@@ -88,8 +139,8 @@ def import_json(engine):
                 "name": it.get("name"),
                 "anime": it.get("anime"),
                 "character_url": it.get("character_url"),
-                "gender": it.get("gender"),
-                "status": it.get("status"),
+                "gender": normalize_gender(it.get("gender")),  # <-- normalized
+                "status": normalize_status(it.get("status")),  # <-- normalized
                 "image_url": it.get("image_url"),
                 "scraped_at": parse_dt(it.get("scraped_at")),
             })
@@ -98,7 +149,9 @@ def import_json(engine):
     print(f"[IMPORT] {count} personnages importés.")
 
 
+# -----------------------------
 # MAIN
+# -----------------------------
 def main():
     engine = create_engine(DB_URL)
     init_db(engine)

@@ -1,10 +1,13 @@
 #greenlet==3.3.1
 #typing_extensions==4.15.0
 
+
 scrapy==2.11.2
 streamlit==1.32.0
 pandas==2.2.1
 sqlalchemy==2.0.28
+plotly>=6.0.0
+elasticsearch==8.10.1
 psycopg2-binary==2.9.9 # driver PostgreSQL pour SQLAlchemy
 python-dotenv==1.0.1 # pour charger les variables d'environnement depuis .env (Assia) et venv (Asmae)
 requests
