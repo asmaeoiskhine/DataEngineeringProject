@@ -96,16 +96,23 @@ if q.strip():
 
 # Recherche Elasticsearch
 st.sidebar.subheader("🔍 Recherche avancée Elasticsearch")
+
 if check_connection():
-    es_query = st.sidebar.text_input("Chercher un personnage dans Elasticsearch :", "")
-    if es_query.strip():
-        hits = search_documents(es_query)
+    es_query = st.sidebar.text_input("Chercher :", "")
+
+    if len(es_query.strip()) >= 3:
+        hits = search_documents(es_query.strip())
         st.sidebar.write(f"{len(hits)} documents trouvés :")
         for hit in hits:
-            src = hit["_source"]
-            st.sidebar.write(f"**{src.get('name','')}** - {src.get('anime','Unknown')} - {src.get('gender','Unknown')}")
+            src = hit.get("_source", {})
+            st.sidebar.write(
+                f"**{src.get('name','')}** - {src.get('anime','Unknown')} - {src.get('gender','Unknown')}"
+            )
+    else:
+        st.sidebar.caption("Tape au moins 3 caractères.")
 else:
     st.sidebar.warning("Elasticsearch non disponible")
+
 
 
 # -----------------------------
@@ -282,33 +289,3 @@ with col2:
 
     st.altair_chart(chart_gender, use_container_width=True)
 
-
-
-# -----------------------------
-# Galerie des personnages
-# -----------------------------
-st.subheader("🖼️ Galerie des personnages")
-
-cols = st.slider("Colonnes", 2, 6, 4)
-limit = st.slider("Nombre d'images", 8, 60, 24)
-
-gallery_df = df_view.copy()
-gallery_df = gallery_df[
-    gallery_df["image_url"].notna() &
-    gallery_df["image_url"].astype(str).str.startswith("http")
-]
-gallery_df = gallery_df.sample(frac=1, random_state=None).head(limit)
-
-grid = st.columns(cols)
-for i, (_, r) in enumerate(gallery_df.iterrows()):
-    with grid[i % cols]:
-        img = fetch_image(r.get("image_url", ""))
-        if img is not None:
-            st.image(img, use_column_width=True)
-        else:
-            st.caption("Image indisponible")
-        st.markdown(f"**{r.get('name','')}**")
-        st.caption(f"{r.get('anime','Unknown')} • {r.get('gender','Unknown')} • {r.get('status','Unknown')}")
-        url = r.get("character_url", "")
-        if isinstance(url, str) and url.startswith("http"):
-            st.markdown(f"[Ouvrir la page]({url})")
