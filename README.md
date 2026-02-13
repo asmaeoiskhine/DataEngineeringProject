@@ -1,4 +1,4 @@
-Projet de l'unité data engineering
+# Introduction - Projet de l'unité Data Engineering
 
 Notre application présente les données de personnages de plusieurs animes scrapées à partir du site web Fandom.com.
 Ce choix nous a semblé idéal pour deux raions:
@@ -11,32 +11,30 @@ Ce projet a pour but de mettre en pratique les notions vues en cours: scraping w
 
 # Architecture/Arborescence
 
-DataEngineeringProject/
 ├── Pipfile
 ├── README.md
 ├── docker-compose.yml
 ├── requirements.txt
 ├── scrapy/
-│   ├── crawler/
-│   │   ├── characters.json
-│   │   ├── crawler/
-│   │   │   ├── items.py
-│   │   │   ├── settings.py
-│   │   │   ├── module/
-│   │   │   └── spiders/
-│   │   │       ├── characters_spider.py
-│   │   │       └── test_categories_spider.py
-│   │   └── scrapy.cfg
-│   └── requirements.txt
+│ ├── crawler/
+│ │ ├── characters.json
+│ │ ├── crawler/
+│ │ │ ├── items.py
+│ │ │ ├── settings.py
+│ │ │ ├── module/
+│ │ │ └── spiders/
+│ │ │ ├── characters_spider.py
+│ │ │ └── test_categories_spider.py
+│ │ └── scrapy.cfg
+│ └── requirements.txt
 └── webapp/
-    ├── Dockerfile
-    ├── app/
-    │   ├── db_init.sql
-    │   ├── elastic_utils.py
-    │   ├── import_characters.py
-    │   └── main.py
-    └── requirements.txt
-
+├── Dockerfile
+├── app/
+│ ├── db_init.sql
+│ ├── elastic_utils.py
+│ ├── import_characters.py
+│ └── main.py
+└── requirements.txt
 
 # Lancement avec Docker-Compose
 Pour lancer l'application web, il suffit de taper la commande suivante à la racine du projet:
