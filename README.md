@@ -11,6 +11,8 @@ Ce projet a pour but de mettre en pratique les notions vues en cours: scraping w
 
 # Architecture/Arborescence
 
+
+```text
 DataEngineeringProject/
 ├── Pipfile
 ├── README.md
@@ -36,6 +38,7 @@ DataEngineeringProject/
     │   ├── import_characters.py
     │   └── main.py
     └── requirements.txt
+```
 
 # Lancement avec Docker-Compose
 Pour lancer l'application web, il suffit de taper la commande suivante à la racine du projet:
