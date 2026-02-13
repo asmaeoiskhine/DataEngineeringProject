@@ -82,27 +82,6 @@ Pour chaque personnage, les données suivantes sont extraires :
 
 Après le scraping, une étape de data cleaning a été mise en place pour observer les données et les nettoyer. Par exemple nous avons uniformiser les valeurs (exemple : "Female", "female", "♀" et autres variantes sont tous convertis en "Female")
 
-La structure du projet scrapy se présente comme suit : 
-
-scrapy/
-├── crawler/
-│   ├── characters.json
-│   ├── crawler/
-│   │   ├── items.py
-│   │   ├── settings.py
-│   │   ├── spiders/
-│   │   │   ├── characters_spider.py
-│   │   │   └── test_categories_spider.py
-│   │   ├── module/
-│   │   │   ├── items.py.tmpl
-│   │   │   ├── middlewares.py.tmpl
-│   │   │   ├── pipelines.py.tmpl
-│   │   │   └── settings.py.tmpl
-│   │   └── __pycache__/
-│   └── scrapy.cfg
-└── requirements.txt
-
-
 Description des fichiers principaux : 
 
 - scrapy.cfg : c'est le fichier de configuration principal de Scrapy, il permet de lancer le projet depuis la racine avec la comande scrapy crawl characters 
