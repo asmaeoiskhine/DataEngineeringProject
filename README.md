@@ -98,6 +98,9 @@ Après reflexion, nous avons décidé d'utiliser la BDD relationnelle PostgreSQL
 D'après nous, c'est la méthode optimale pour gérer un gros volume rapidement et de manière cohérente.
 Pour accéder à la BBD, nous utilisons SQLAlchemy qui est compatible avec docker.
 
+Le fichier db_init.sql permet l'initialisation de la base PostgreSQL. Il crée la table characters avec les colonnes principales 'id, name, anime, gender etc ..).
+Il définit aussi les types de colonnes (VARCHAR, TEXT etc ..) et ajoute un index si nécessaire pour accéler les requêtes. 
+
 # WebApp avec Streamlit
 Pour l'application web, nous avons opté pour Streamlit que nous avons déjà manipulé. C'est un framework rapide à développer et qui permet d'obtenir une interface interactive.
 L'interface est composée de 3 onglets:
@@ -105,3 +108,11 @@ L'interface est composée de 3 onglets:
 - Le 2ème onglet affiche un mini quiz de personnalité qui exploite nos données scrapées
 - Le 3ème onglet permet d'afficher une galerie de personnages avec une interface interactive sur laquelle il est possible de mofidier les paramètre d'affichage.
 Enfin, la side barre permet de retrouver les onglets et les filtres pour le dashboard. L'un permet de filtrer par animé, l'autre de rechercher une donnée via le moteur de recherche elasticsearch.
+
+Description des fichiers principaux : 
+
+- import_characters.py : il importe les données scrapées dans PostreQSL en lisant le fichier JSON, transforme les données en DataFrame Pandas, nettoie et normalise le sdonnées puis le sinsère dans la base via SQLAlchemy. 
+- main.py : c'est le dashboard pour visualiser toutes les données. Il charge les personnages depuis la base, permet de filtrer et rechercher facilement et affiche à la fois les statistiques et un tableau interactif, ainsi que la side bar avec les différents onglets.
+- 1_tab_quiz.py : mini quiz de perosnnalité basé sur les personnages
+- 2_tab_gallery.py : galerie interactive des personnages
+
