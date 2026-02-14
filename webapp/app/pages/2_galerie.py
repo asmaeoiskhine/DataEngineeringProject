@@ -34,7 +34,7 @@ def fetch_image(url: str):
     except Exception:
         return None
 
-st.subheader("Galerie de portrait")
+st.subheader("Galerie de portraits")
 
 cols = st.slider("Colonnes", 2, 6, 4)
 limit = st.slider("Nombre d'images", 8, 60, 24)
