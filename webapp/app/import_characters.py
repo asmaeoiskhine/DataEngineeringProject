@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 # Configuration pour le scraping en temps réel et l'import des données dans la DB
 DB_URL = os.environ["DATABASE_URL"]
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]  # racine du projet depuis ce fichier
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PROJECT_ROOT = PROJECT_ROOT.parent
 
 SCRAPY_DIR = Path(os.environ.get("SCRAPY_DIR", PROJECT_ROOT / "scrapy" / "crawler")).resolve()
@@ -21,23 +21,15 @@ RUN_SCRAPY_ON_START = os.environ.get("RUN_SCRAPY_ON_START", "1") == "1"
 # UTILS
 # -----------------------------
 def normalize_gender(gender: str) -> str:
-    """
-    Normalize gender values:
-    - 'female' (any case) or '♀' → 'Female'
-    - 'male' (any case) or '♂' → 'Male'
-    - Anything else → 'Unknown'
-    """
     if not isinstance(gender, str) or not gender.strip():
         return "Unknown"
 
     g = gender.strip().lower()
 
-
     if "♀" in g:
         return "Female"
     if "♂" in g:
         return "Male"
-
 
     if "female" in g:
         return "Female"
@@ -48,12 +40,6 @@ def normalize_gender(gender: str) -> str:
 
 
 def normalize_status(status: str) -> str:
-    """
-    Normalize status values:
-    - contains 'Alive' (any case) → 'Alive'
-    - contains 'Deceased' (any case) → 'Deceased'
-    - anything else → 'Unknown'
-    """
     if not isinstance(status, str) or not status.strip():
         return "Unknown"
 
@@ -120,11 +106,16 @@ def import_json(engine):
     count = 0
     with engine.begin() as conn:
         for it in items:
-            if not it.get("name") or not it.get("character_url"):
+            name = it.get("name")
+            if not name or not it.get("character_url"):
+                continue
+
+
+            if name.startswith("List of"):
                 continue
 
             conn.execute(sql, {
-                "name": it.get("name"),
+                "name": name,
                 "anime": it.get("anime"),
                 "character_url": it.get("character_url"),
                 "gender": normalize_gender(it.get("gender")),

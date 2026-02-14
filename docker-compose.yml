@@ -8,27 +8,10 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
       POSTGRES_DB: app
-      ELASTIC_USER: elastic
-      ELASTIC_PASSWORD: elasticmdp
-      ELASTIC_HOST: elasticsearch
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
-    container_name: de_elasticsearch
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - ELASTIC_PASSWORD=elasticmdp
-      - xpack.security.enabled=true
-    ports:
-      - "9200:9200"
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
-
 
   web:
     build:
@@ -45,8 +28,6 @@ services:
       - "8501:8501"
     depends_on:
       - db
-      - elasticsearch
 
 volumes:
   pgdata:
-  esdata:

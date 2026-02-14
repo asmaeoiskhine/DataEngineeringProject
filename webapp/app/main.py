@@ -9,7 +9,7 @@ from io import BytesIO
 import plotly.express as px
 
 import streamlit as st
-from elastic_utils import check_connection, search_documents
+
 
 st.set_page_config(page_title="Dashboard - Personnages d'Animes", layout="wide")
 
@@ -72,7 +72,7 @@ df["gender"] = df["gender"].apply(clean_gender)
 df["status"] = df["status"].apply(clean_status)
 
 # -----------------------------
-# Sidebar filters + Elasticsearch
+# Sidebar filters
 # -----------------------------
 st.sidebar.header("Filtres")
 
@@ -93,27 +93,6 @@ if q.strip():
         return False
     df_view = df_view[df_view.apply(match_row, axis=1)]
 
-# Recherche Elasticsearch
-st.sidebar.subheader("Recherche avancée avec Elasticsearch")
-
-if check_connection():
-    es_query = st.sidebar.text_input("Chercher :", "")
-
-    if len(es_query.strip()) >= 3:
-        hits = search_documents(es_query.strip())
-        st.sidebar.write(f"{len(hits)} items trouvés :")
-        for hit in hits:
-            src = hit.get("_source", {})
-            st.sidebar.write(
-                f"**{src.get('name','')}** - {src.get('anime','Unknown')} - {src.get('gender','Unknown')}"
-            )
-    else:
-        st.sidebar.caption("Tape au moins 3 caractères.")
-else:
-    st.sidebar.warning("Elasticsearch non disponible")
-
-
-
 # -----------------------------
 # KPI
 # -----------------------------
@@ -123,7 +102,6 @@ colB.metric("Affichés", len(df_view))
 colC.metric("Animes", df["anime"].nunique(dropna=True))
 
 st.divider()
-
 
 # -----------------------------
 # Table + Répartition
@@ -145,9 +123,6 @@ with left:
     )
 
 with right:
-    #---------------------------
-    # Répartition globale
-    #---------------------------
     st.subheader("Distribution du nombre de personnages par Anime")
     by_anime = df_view["anime"].fillna("Unknown").value_counts().head(15)
     st.bar_chart(by_anime)
@@ -162,11 +137,9 @@ with col1:
 
     import altair as alt
 
-    # Filtrer Alive et Deceased
     df_status = df_view[df_view["status"].isin(["Alive", "Deceased"])].copy()
     df_status["anime"] = df_status["anime"].fillna("Unknown")
 
-    # Comptage par anime et status
     counts = (
         df_status
         .groupby(["anime", "status"])
@@ -174,7 +147,6 @@ with col1:
         .reset_index(name="count")
     )
 
-    # Top 15 animes
     top_animes = (
         df_status["anime"]
         .value_counts()
@@ -184,7 +156,6 @@ with col1:
 
     counts = counts[counts["anime"].isin(top_animes)]
 
-    # Graphique Altair (2 barres par anime)
     chart = (
         alt.Chart(counts)
         .mark_bar()
@@ -212,21 +183,12 @@ with col2:
 
     import altair as alt
 
-    # -----------------------------
-    # Filtrer Male / Female
-    # -----------------------------
     df_gender = df_view[df_view["gender"].isin(["Male", "Female"])].copy()
     df_gender["anime"] = df_gender["anime"].fillna("Unknown")
 
-    # -----------------------------
-    # Top 15 animes les plus représentés
-    # -----------------------------
     top_animes_gender = df_gender["anime"].value_counts().head(15).index
     df_gender = df_gender[df_gender["anime"].isin(top_animes_gender)]
 
-    # -----------------------------
-    # Comptage par anime + gender
-    # -----------------------------
     counts_gender = (
         df_gender
         .groupby(["anime", "gender"])
@@ -234,9 +196,6 @@ with col2:
         .reset_index(name="count")
     )
 
-    # -----------------------------
-    # Total par anime
-    # -----------------------------
     totals = (
         counts_gender
         .groupby("anime")["count"]
@@ -244,17 +203,11 @@ with col2:
         .reset_index(name="total")
     )
 
-    # -----------------------------
-    # Calcul des pourcentages
-    # -----------------------------
     counts_gender = counts_gender.merge(totals, on="anime")
     counts_gender["percentage"] = (
         counts_gender["count"] / counts_gender["total"] * 100
     )
 
-    # -----------------------------
-    # Graphique Altair (barres empilées 100 %)
-    # -----------------------------
     chart_gender = (
         alt.Chart(counts_gender)
         .mark_bar()
@@ -287,4 +240,3 @@ with col2:
     )
 
     st.altair_chart(chart_gender, use_container_width=True)
-
